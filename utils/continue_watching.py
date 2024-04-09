@@ -31,7 +31,7 @@ def check_local_progress(available_list):
 
         print(available_list)
         if 'local_progress' in v and v['local_progress'] > available_list[v['title']]['progress']:
-            print('ye')
+            print('yeah')
 
 def continue_watching():
     try:
@@ -41,7 +41,10 @@ def continue_watching():
 
     folder_map = utils.mapper.get_map()
     # We do a little trolling
-    available_list = [{**v, 'folder': k} for k, v in folder_map.items() if 'status' in v and v['status'] == 'WATCHING' and get_episode_path(k, v['progress'] + 1)]
+    
+    available_list = [{**v, 'folder': k, 'progress': v.get('progress', 0)} 
+                    for k, v in folder_map.items() if get_episode_path(k, (v.get('progress', 0) + 1))]
+
     if not available_list:
         print('\nNo valid items found!')
         more_options()
@@ -74,6 +77,10 @@ def get_episode_path(selected_anime_folder, selected_anime_episode):
     for file in sorted(os.listdir(selected_anime_folder)):
         if file.startswith('.'):
             continue
+
+        if file.endswith(".conf"):
+            continue
+        
         episodes.append(file)
     folder_map = utils.mapper.get_map()
     offset = 0
@@ -90,7 +97,7 @@ def play_episode(episode_path):
         print(colored_text([[RED, f"\n'{episode_path}' does not exist!"]]))
         exit()
     mpv_path = utils.config.get_config()['mpv_path']
-    subprocess.Popen([mpv_path, episode_path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    subprocess.Popen([mpv_path, episode_path], cwd=os.path.dirname(episode_path))
     quit()
 
 def more_options():

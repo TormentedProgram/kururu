@@ -32,7 +32,7 @@ def get_leaf_folders():
 
 def get_unmapped_folders(folders):
     folder_map = get_map()
-    return [folder for folder in folders if folder not in folder_map]
+    return [folder for folder in folders if folder not in folder_map and not folder.startswith('.')] #rip .hacksign bozo
 
 def map_folder_from_unmapped(unmapped_folders):
     print(colored_text([[GREEN, '\nUnmapped folders:']]))
