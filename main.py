@@ -1,7 +1,8 @@
 import sys
-import utils.config, utils.mapper, utils.continue_watching
+import utils.config, utils.mapper, utils.continue_watching, utils.search
 from utils.mapper import map_folder
 from utils.common import get_module, clear_screen
+from utils.search import get_anilist_id
 
 colorama = get_module("Colorama")
 colorama.init()
@@ -9,8 +10,9 @@ colorama.init()
 def main():
     if len(sys.argv) == 3:
         path = str(sys.argv[1])
-        id = int(sys.argv[2])
-        if path and id:
+        search = str(sys.argv[2])
+        if path and search:
+            id = get_anilist_id(search)
             map_folder(path, id)
         else:
             main()

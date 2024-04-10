@@ -1,16 +1,17 @@
 import utils.anilist_requests
 from utils.common import colored_text, GREEN, RED, CYAN
 
-def get_anilist_id():
-    search_term = input(colored_text(
-        [
-            [None, "\nEnter a "],
-            [GREEN, "search term "],
-            [None, "or "],
-            [GREEN, "'m' "],
-            [None, "to manually enter ID: "]
-        ]
-    ))
+def get_anilist_id(search_term=None):
+    if search_term is None:
+        search_term = input(colored_text(
+            [
+                [None, "\nEnter a "],
+                [GREEN, "search term "],
+                [None, "or "],
+                [GREEN, "'m' "],
+                [None, "to manually enter ID: "]
+            ]
+        ))
 
     if not search_term:
         print(colored_text([[RED, "\nAborted mapping!"]]))
