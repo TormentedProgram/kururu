@@ -1,5 +1,39 @@
+import sys
 import os
-from colorama import Style, Fore
+import importlib
+
+def install_package(package):
+    import subprocess
+    try:
+        importlib.import_module('pip')
+    except ImportError:
+        print("Pip installing now")
+        subprocess.run([sys.executable, "-m", "ensurepip", "--upgrade"])
+
+    subprocess.run([sys.executable, "-m", "pip", "install", package])
+    return True
+
+def get_module(package_name, forceinstall=False):
+    if forceinstall:
+        try:
+            package = importlib.import_module(package_name)
+        except ImportError:
+            print(f"{package_name} is not installed. Installing...")
+            if install_package(package_name):  # Wait for install_package to return True
+                package = importlib.import_module(package_name)
+            else:
+                print(f"Failed to install {package_name}.")
+                return None  # Return None if installation failed
+            return package
+    
+    try:
+        package = importlib.import_module(package_name)
+    except ImportError:
+        package = get_module(package_name.lower(), True)
+    return package
+
+Style = get_module('Colorama').Style
+Fore = get_module('Colorama').Fore
 
 GREEN = Fore.GREEN
 RED = Fore.RED
@@ -9,6 +43,19 @@ YELLOW = Fore.YELLOW
 
 def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
+
+def escape_windows_path(path):
+    new_path = ""
+    i = 0
+    while i < len(path):
+        if path[i] == '\\':
+            new_path += '\\\\'
+            while i < len(path) - 1 and path[i + 1] == '\\':
+                i += 1
+        else:
+            new_path += path[i]
+        i += 1
+    return new_path
 
 def colored_text(text_arr):
     s = ''

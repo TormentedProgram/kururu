@@ -1,5 +1,6 @@
 import json, sys, os, subprocess
-from utils.common import colored_text, GREEN, RED
+import requests
+from utils.common import colored_text, escape_windows_path, GREEN, RED
 
 def set_up():
     if os.path.exists(os.path.join(sys.path[0], 'config.json')):
@@ -60,6 +61,15 @@ def get_mpv_path():
     return mpv_path
 
 def update_lua_script():
+    if not os.path.exists(os.path.join(sys.path[0], 'anilist.lua')):
+        response = requests.get("https://raw.githubusercontent.com/hotsno/keroro/main/anilist.lua")
+        if response.status_code == 200:
+            with open(os.path.join(sys.path[0], 'anilist.lua'), 'w') as file:
+                file.write(response.text)
+        else:
+            print(f"Failed to fetch latest lua script: {response.status_code}")
+            return None
+
     python_path = sys.executable
     update_path = os.path.join(sys.path[0], 'utils', 'update_progress.py')
     update_presence_path = os.path.join(sys.path[0], 'presence', 'update_presence.py')
@@ -88,16 +98,3 @@ def save_config(config):
         f.seek(0)
         json.dump(config, f, indent=4)
         f.truncate()
-
-def escape_windows_path(path):
-    new_path = ""
-    i = 0
-    while i < len(path):
-        if path[i] == '\\':
-            new_path += '\\\\'
-            while i < len(path) - 1 and path[i + 1] == '\\':
-                i += 1
-        else:
-            new_path += path[i]
-        i += 1
-    return new_path
