@@ -19,7 +19,7 @@ def get_watching_list():
     }
     query = '''
     query ($userName: String) {
-      Page(page: 1, perPage: 1000) {
+      Page(page: 1, perPage: null) {
         mediaList(userName: $userName, status_in: [CURRENT, REPEATING], type: ANIME) {
           progress
           media {
@@ -67,15 +67,21 @@ def get_search_results(searchTerm, page):
         cleaned_up.append([item["title"]["romaji"], item["id"]])
     return cleaned_up
 
-def update_progress(mediaId, progress):
+def update_progress(mediaId, progress, status=None):
+    if status is None:
+        status = "CURRENT"
+    else:
+        status = status.upper()
     variables = {
         "mediaId": mediaId,
-        "progress": progress
+        "progress": progress,
+        "status": status
     }
     query = '''
-    mutation ($mediaId: Int, $progress: Int) {
-      SaveMediaListEntry (mediaId: $mediaId, progress: $progress) {
+    mutation ($mediaId: Int, $progress: Int, $status: MediaListStatus) {
+      SaveMediaListEntry (mediaId: $mediaId, progress: $progress, status: $status) {
           progress
+        	status
       }
     }
     '''

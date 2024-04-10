@@ -6,6 +6,8 @@ def map():
     remove_invalid_paths()
     leaf_folders = get_leaf_folders()
     unmapped_folders = get_unmapped_folders(leaf_folders)
+    if len(unmapped_folders) == 0:
+        print(colored_text([[RED, "There is no folders left to map in specified directory!"]]))
     while unmapped_folders:
         map_folder_from_unmapped(unmapped_folders)
 
@@ -32,7 +34,7 @@ def get_leaf_folders():
 
 def get_unmapped_folders(folders):
     folder_map = get_map()
-    return [folder for folder in folders if folder not in folder_map and not folder.startswith('.')] #rip .hacksign bozo
+    return [folder for folder in folders if folder not in folder_map and not folder.startswith('~')]
 
 def map_folder_from_unmapped(unmapped_folders):
     print(colored_text([[GREEN, '\nUnmapped folders:']]))

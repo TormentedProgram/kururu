@@ -7,6 +7,9 @@ BLUE = Fore.BLUE
 CYAN = Fore.CYAN
 YELLOW = Fore.YELLOW
 
+def clear_screen():
+    os.system('cls' if os.name == 'nt' else 'clear')
+
 def colored_text(text_arr):
     s = ''
     for style, text in text_arr:

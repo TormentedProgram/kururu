@@ -1,6 +1,6 @@
 import subprocess, os
 import utils.anilist_requests, utils.mapper, utils.offset, utils.config
-from utils.common import colored_text, GREEN, CYAN, YELLOW, RED
+from utils.common import colored_text, clear_screen, GREEN, CYAN, YELLOW, RED
 
 def sync_with_anilist():
     watchlist = utils.anilist_requests.get_watching_list()
@@ -12,8 +12,16 @@ def sync_with_anilist():
             anilist_progress = watchlist[anilist_id]['progress']
             if 'progress' in o and o['progress'] > anilist_progress:
                 # TODO: Add colors to this (way too lazy to do this rn)
-                print(f'\nMismatched progress for {watchlist[anilist_id]["title"]}!\n')
-                keep = input(f'AniList progress: {anilist_progress}\nLocal progress: {o["progress"]}\n\nKeep local? [y/n] ') == 'y'
+                # i gotchu hombre
+                print(colored_text([[RED, f'\nMismatched progress for {watchlist[anilist_id]["title"]}!\n']]))
+                keep = input(colored_text(
+                            [
+                                [GREEN, "AniList progress: "],
+                                [CYAN, {anilist_progress}],
+                                [YELLOW, "\nLocal progress:"],
+                                [CYAN, {o["progress"]}],
+                                [GREEN, "\n\nKeep local? [y/n] "]
+                            ])) == 'y'
                 if not keep:
                     o['progress'] = watchlist[anilist_id]['progress']
                 else:
@@ -40,7 +48,7 @@ def continue_watching():
         print('\nCan\'t connect to AniList!')
 
     folder_map = utils.mapper.get_map()
-    # We do a little trolling
+    # We do a little trolling no we don't wtf?
     
     available_list = [{**v, 'folder': k, 'progress': v.get('progress', 0)} 
                     for k, v in folder_map.items() if get_episode_path(k, (v.get('progress', 0) + 1))]
@@ -60,6 +68,8 @@ def continue_watching():
             [YELLOW, f'Episode {int(anime["progress"]) + 1}']
         ]))
     user_input = input("\nSelect a show ('m' for more options): ")
+    if user_input:
+        user_input = user_input.lower()
     if user_input == 'm':
         more_options()
     
@@ -101,6 +111,7 @@ def play_episode(episode_path):
     quit()
 
 def more_options():
+    clear_screen()
     while True:
         print(colored_text([
             [GREEN, '\nm'],
@@ -113,6 +124,9 @@ def more_options():
             [None, ' - quit'],
         ]))
         user_input = input('\nInput: ')
+        if user_input:
+            user_input = user_input.lower()
+            clear_screen()
         if user_input == 'm':
             utils.mapper.map()
         elif user_input == 'o':
@@ -122,4 +136,4 @@ def more_options():
         elif user_input == 'q':
             quit()
         else:
-            print('\nInvalid option!')
+            print(colored_text([[RED, '\nInvalid option!']]))

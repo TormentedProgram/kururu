@@ -14,7 +14,7 @@ RPC = Presence(client_id)
 RPC.connect()
 
 while True:
-    time.sleep(5)
+    time.sleep(1)
     m = get_map()
     if not m:
         continue
@@ -25,10 +25,6 @@ while True:
     small_image = 'anilist'
     small_text = m['username'] + ' on AniList'
     buttons = [
-        {
-            'label': 'Try Keroro',
-            'url': 'https://github.com/hotsno/keroro'
-        },
         {
             'label': 'AniList entry',
             'url': m['link']
