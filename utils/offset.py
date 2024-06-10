@@ -1,5 +1,6 @@
 import utils.mapper, utils.config
 from colorama import Fore, Style
+import os
 
 def create_offset():
     folder_map = utils.mapper.get_map()
@@ -12,8 +13,8 @@ def create_offset():
     for folder in folder_map:
         folders.append(folder)
     for folder in folders:
-        anime_folder_len = len(utils.config.get_config()["anime_folder"])
-        print(f'[{Fore.GREEN}{i}{Style.RESET_ALL}] {Fore.CYAN}{folder[anime_folder_len + 1:]}{Style.RESET_ALL}')
+        anime_folder = utils.config.get_config()["anime_folder"]
+        print(f'[{Fore.GREEN}{i}{Style.RESET_ALL}] {Fore.CYAN}{os.path.relpath(folder, anime_folder)}{Style.RESET_ALL}')
         i += 1
     folder_to_offset = int(input("\nSelect a folder to add an offset to: ")) - 1
     offset = int(input("Enter offset: "))

@@ -19,7 +19,7 @@ def get_watching_list():
     }
     query = '''
     query ($userName: String) {
-      Page(page: 1, perPage: 20) {
+      Page(page: 1, perPage: 1000) {
         mediaList(userName: $userName, status_in: [CURRENT, REPEATING], type: ANIME) {
           progress
           media {
@@ -53,7 +53,7 @@ def get_search_results(searchTerm, page):
       Page(page: $page, perPage: 5) {
         media(search: $searchTerm, type: ANIME) {
           title {
-            romaji
+            english
           }
           id
         }
@@ -64,7 +64,7 @@ def get_search_results(searchTerm, page):
     cleaned_up = []
     watchlist = result["data"]["Page"]["media"]
     for item in watchlist:
-        cleaned_up.append([item["title"]["romaji"], item["id"]])
+        cleaned_up.append([item["title"]["english"], item["id"]])
     return cleaned_up
 
 def update_progress(mediaId, progress):
@@ -107,7 +107,7 @@ def get_anime_details(anilist_id):
     query ($id: Int) {
       Media(id: $id) {
         title {
-          romaji
+          english
         },
         siteUrl,
         coverImage {

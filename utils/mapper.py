@@ -36,9 +36,10 @@ def get_unmapped_folders(folders):
 
 def map_folder_from_unmapped(unmapped_folders):
     print(colored_text([[GREEN, '\nUnmapped folders:']]))
+    anime_folder = utils.config.get_config()['anime_folder']
+    unmapped_folders.sort()
     for i, folder in enumerate(unmapped_folders):
-        anime_folder_len = len(utils.config.get_config()['anime_folder'])
-        relative_folder_path = folder[anime_folder_len + 1:]
+        relative_folder_path = os.path.relpath(folder, anime_folder)
         print(colored_text([
             [None, '['],
             [GREEN,  str(i + 1)],
@@ -79,7 +80,7 @@ def map_folder(folder, anilist_id):
     folder_map = get_map()
     folder_map[folder] = {
         'anilist_id': anilist_id,
-        'title': anime_details['Media']['title']['romaji'],
+        'title': anime_details['Media']['title']['english'],
         'link': anime_details['Media']['siteUrl'],
         'poster': anime_details['Media']['coverImage']['medium']
     }
