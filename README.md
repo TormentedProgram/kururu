@@ -2,7 +2,7 @@
   <img src="https://user-images.githubusercontent.com/71658949/210159393-f8ead149-5076-4b76-b95b-11df38e871fd.png" width="300px"/>
 </p>
 
-## Kururu is Keroro but it just works™ [Hell yeah todd howard](https://www.youtube.com/watch?v=YPN0qhSyWy8)
+## Kururu is Keroro but it just works™ [(bethesda reference)](https://www.youtube.com/watch?v=YPN0qhSyWy8)
 Keroro is a CLI tool + [mpv](https://github.com/mpv-player/mpv) script that uses AniList as a way to keep track of the watch progress of your locally downloaded anime. It allows you to watch the next episode of an anime in mpv as well as mark an episode as complete when >80% of the episode has been watched.
 
 ## Features
