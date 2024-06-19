@@ -53,11 +53,12 @@ def continue_watching():
             [GREEN, str(i + 1)],
             [None, '] '],
             [None, '['],
-            [YELLOW, f"Ep {int(anime.get('progress', 0)) + 1}"],
+            [YELLOW, f"EP {int(anime.get('progress', 0)) + 1}"],
             [None, '] '],
             [CYAN, anime['title']],
-            [None, ' - ' if 'shortlink' in anime and anime['shortlink'] else ""],
-            [RED, anime['shortlink'].replace("https://", "www.") if 'shortlink' in anime and anime['shortlink'] else ""],
+            [None, ' [' if 'shortlink' in anime and anime['shortlink'] else ""],
+            [YELLOW, anime['shortlink'].replace("https://", "www.") if 'shortlink' in anime and anime['shortlink'] else ""],
+            [None, ']' if 'shortlink' in anime and anime['shortlink'] else ""],
         ]))
         
     user_input = input("\nSelect a show ('m' for more options): ")
@@ -94,7 +95,7 @@ def play_episode(episode_path):
         print(colored_text([[RED, f"\n'{episode_path}' does not exist!"]]))
         exit()
     mpv_path = utils.config.get_config()['mpv_path']
-    subprocess.Popen([mpv_path, episode_path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    subprocess.Popen([mpv_path, episode_path], start_new_session=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     continue_watching()
 
 def more_options():
