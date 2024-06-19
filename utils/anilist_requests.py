@@ -70,11 +70,12 @@ def get_search_results(searchTerm, page):
 def update_progress(mediaId, progress):
     variables = {
         "mediaId": mediaId,
+        "mediaStatus": "CURRENT",
         "progress": progress
     }
     query = '''
-    mutation ($mediaId: Int, $progress: Int) {
-      SaveMediaListEntry (mediaId: $mediaId, progress: $progress) {
+    mutation ($mediaId: Int, $progress: Int, $mediaStatus: MediaListStatus) {
+      SaveMediaListEntry (mediaId: $mediaId, status: $mediaStatus, progress: $progress) {
           progress
       }
     }
@@ -96,8 +97,11 @@ def get_progress(mediaId):
     '''
     result = anilist_call(query, variables)
     if result["data"]["MediaList"] == None:
-        raise ValueError(f'AniList ID {mediaId} is not on your AniList.')
-    return result["data"]["MediaList"]["progress"]
+        return 1
+    try:
+        return result["data"]["MediaList"]["progress"]
+    except Exception as e:
+        return 1
 
 def get_anime_details(anilist_id):
     variables = {

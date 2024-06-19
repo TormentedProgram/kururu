@@ -1,6 +1,16 @@
 import json, os, sys
 import utils.anilist_requests, utils.search, utils.config
-from utils.common import colored_text, GREEN, CYAN, RED
+from utils.common import colored_text, GREEN, CYAN, RED, YELLOW
+import pyshorteners
+
+def remap():
+    for folder_path, folder_dict in get_map().items():
+        print(colored_text([
+            [GREEN, 'Remapping '],
+            [CYAN,  os.path.join(os.path.basename(os.path.dirname(folder_path)), os.path.basename(folder_path))],
+            [YELLOW,  f" ({folder_dict["anilist_id"]})"]
+        ]))
+        map_folder(folder_path, folder_dict["anilist_id"])
 
 def map():
     remove_invalid_paths()
@@ -82,6 +92,7 @@ def map_folder(folder, anilist_id):
         'anilist_id': anilist_id,
         'title': anime_details['Media']['title']['english'],
         'link': anime_details['Media']['siteUrl'],
+        'shortlink': pyshorteners.Shortener().tinyurl.short(anime_details['Media']['siteUrl']),
         'poster': anime_details['Media']['coverImage']['medium']
     }
     save_map(folder_map)

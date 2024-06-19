@@ -8,7 +8,7 @@ def update_progress_local(watched_episode, folder_path, folder_map):
 
 def update_progress(watched_episode, folder_path):
     media_id = folder_map[folder_path]["anilist_id"]
-    progress = utils.anilist_requests.get_progress(media_id)
+    progress = utils.anilist_requests.get_progress(media_id) or 1
     if watched_episode <= progress:
         quit()
     utils.anilist_requests.update_progress(media_id, watched_episode)

@@ -9,13 +9,13 @@ def sync_with_anilist():
         anilist_id = o['anilist_id']
         if anilist_id in watchlist:
             o['status'] = 'WATCHING'
-            anilist_progress = watchlist[anilist_id]['progress']
+            anilist_progress = watchlist[anilist_id]['progress'] or 0
             if 'progress' in o and o['progress'] > anilist_progress:
                 # TODO: Add colors to this (way too lazy to do this rn)
                 print(f'\nMismatched progress for {watchlist[anilist_id]["title"]}!\n')
                 keep = input(f'AniList progress: {anilist_progress}\nLocal progress: {o["progress"]}\n\nKeep local? [y/n] ') == 'y'
                 if not keep:
-                    o['progress'] = watchlist[anilist_id]['progress']
+                    o['progress'] = watchlist[anilist_id]['progress'] or 0
                 else:
                     utils.anilist_requests.update_progress(anilist_id, o['progress'])
             else:
@@ -41,7 +41,7 @@ def continue_watching():
 
     folder_map = utils.mapper.get_map()
     # We do a little trolling
-    available_list = [{**v, 'folder': k} for k, v in folder_map.items() if 'status' in v and v['status'] == 'WATCHING' and get_episode_path(k, v['progress'] + 1)]
+    available_list = [{**v, 'folder': k} for k, v in folder_map.items() if 'status' in v and get_episode_path(k, v.get('progress', 0) + 1)]
     if not available_list:
         print('\nNo valid items found!')
         more_options()
@@ -52,21 +52,25 @@ def continue_watching():
             [None, '['],
             [GREEN, str(i + 1)],
             [None, '] '],
+            [None, '['],
+            [YELLOW, f"Ep {int(anime.get('progress', 0)) + 1}"],
+            [None, '] '],
             [CYAN, anime['title']],
-            [None, ' - '],
-            [YELLOW, f'Episode {int(anime["progress"]) + 1}']
+            [None, ' - ' if 'shortlink' in anime and anime['shortlink'] else ""],
+            [RED, anime['shortlink'].replace("https://", "www.") if 'shortlink' in anime and anime['shortlink'] else ""],
         ]))
+        
     user_input = input("\nSelect a show ('m' for more options): ")
     if user_input == 'm':
         more_options()
     
     selected_anime = available_list[int(user_input) - 1]
     selected_anime_folder = selected_anime['folder']
-    selected_anime_episode = selected_anime['progress'] + 1
+    selected_anime_episode = selected_anime.get('progress',0) + 1
     episode_path = get_episode_path(selected_anime_folder, selected_anime_episode)
     if not episode_path:
         print(colored_text([[RED, f'Episode not found! Check the folder below and add an episode offset if needed:\n{selected_anime_folder}']]))
-        quit()
+        continue_watching()
     play_episode(episode_path)
 
 def get_episode_path(selected_anime_folder, selected_anime_episode):
@@ -91,13 +95,15 @@ def play_episode(episode_path):
         exit()
     mpv_path = utils.config.get_config()['mpv_path']
     subprocess.Popen([mpv_path, episode_path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    quit()
+    continue_watching()
 
 def more_options():
     while True:
         print(colored_text([
             [GREEN, '\nm'],
             [None, ' - map folders to AniList IDs\n'],
+            [GREEN, 'r'],
+            [None, ' - attempt auto remapping\n'],
             [GREEN, 'o'],
             [None, ' - add offset\n'],
             [GREEN, 'w'],
@@ -108,6 +114,8 @@ def more_options():
         user_input = input('\nInput: ')
         if user_input == 'm':
             utils.mapper.map()
+        elif user_input == 'r':
+            utils.mapper.remap()
         elif user_input == 'o':
             utils.offset.create_offset()
         elif user_input == 'w':
