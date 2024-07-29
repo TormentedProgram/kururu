@@ -8,10 +8,12 @@ def update_progress_local(watched_episode, folder_path, folder_map):
 
 def update_progress(watched_episode, folder_path):
     media_id = folder_map[folder_path]["anilist_id"]
-    progress = utils.anilist_requests.get_progress(media_id) or 1
+    length = folder_map[folder_path]["length"]
+    progress = utils.anilist_requests.get_progress(media_id) or 0
+    #keep an eye on the (watched_episode <= progress) function if first episodes aren't registering
     if watched_episode <= progress:
         quit()
-    utils.anilist_requests.update_progress(media_id, watched_episode)
+    utils.anilist_requests.update_progress(media_id, watched_episode, length)
 
 if __name__ == '__main__':
     file_path = sys.argv[1]
@@ -21,6 +23,6 @@ if __name__ == '__main__':
     try:
         update_progress(watched_episode, folder_path)
         print('Updated AniList!')
-    except:
+    except Exception as e:
         update_progress_local(watched_episode, folder_path, folder_map)
-        print('Updated progress locally!')
+        print('Updated progress locally!\nAnilist Error: ' + e)

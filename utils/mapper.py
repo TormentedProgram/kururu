@@ -1,4 +1,4 @@
-import json, os, sys
+import json, os, sys, requests
 import utils.anilist_requests, utils.search, utils.config
 from utils.common import colored_text, GREEN, CYAN, RED, YELLOW
 import pyshorteners
@@ -8,9 +8,9 @@ def remap():
         print(colored_text([
             [GREEN, 'Remapping '],
             [CYAN,  os.path.join(os.path.basename(os.path.dirname(folder_path)), os.path.basename(folder_path))],
-            [YELLOW,  f" ({folder_dict["anilist_id"]})"]
+            [YELLOW, f" ({folder_dict['anilist_id']})"]
         ]))
-        map_folder(folder_path, folder_dict["anilist_id"])
+        map_folder(folder_path, folder_dict["anilist_id"], True)
 
 def map():
     remove_invalid_paths()
@@ -85,16 +85,40 @@ def map_folder_from_unmapped(unmapped_folders):
     if not unmapped_folders:
         print(colored_text([[GREEN, '\nAll your folders are mapped!']]))
 
-def map_folder(folder, anilist_id):
+def download_image(url):
+    filename = os.path.basename(url)
+    save_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),'posters',f'{filename}')
+    if os.path.exists(save_path):
+        return save_path
+    os.makedirs(os.path.dirname(save_path), exist_ok=True)
+    response = requests.get(url)
+    if response.status_code == 200:
+        with open(save_path, 'wb') as file:
+            file.write(response.content)
+        return save_path
+    else:
+        return None
+
+def map_folder(folder, anilist_id, remap=False):
     anime_details = utils.anilist_requests.get_anime_details(anilist_id)
     folder_map = get_map()
+    try:
+        shortlink = pyshorteners.Shortener().tinyurl.short(anime_details['Media']['siteUrl'])
+    except:
+        shortlink = str(anime_details['Media']['siteUrl'])
     folder_map[folder] = {
         'anilist_id': anilist_id,
+        'mal_id': anime_details['Media']['idMal'],
         'title': anime_details['Media']['title']['english'],
         'link': anime_details['Media']['siteUrl'],
-        'shortlink': pyshorteners.Shortener().tinyurl.short(anime_details['Media']['siteUrl']),
-        'poster': anime_details['Media']['coverImage']['medium']
+        'shortlink': shortlink,
+        'length': anime_details['Media']['episodes'],
+        'poster': anime_details['Media']['coverImage']['medium'],
+        'local_poster': download_image(anime_details['Media']['coverImage']['medium'])
     }
+    #make it watching so it shows up v
+    if not remap:
+        utils.anilist_requests.update_progress(anilist_id, 0, anime_details['Media']['episodes'])
     save_map(folder_map)
     print(colored_text([
         [GREEN, 'Mapped to AniList ID '],
