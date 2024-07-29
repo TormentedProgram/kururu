@@ -56,6 +56,7 @@ def continue_watching():
 
     # We do a little trolling
     available_list = get_list()
+    folder_map = utils.mapper.get_map()
     if not available_list:
         print('\nNo valid items found!')
         more_options()
@@ -76,8 +77,15 @@ def continue_watching():
         ]
         if utils.config.get_config()["image_previews"]:
             if not os.path.exists(anime['local_poster']):
-                anime['local_poster'] = utils.mapper.download_image(anime['poster'])
-                utils.mapper.save_map(available_list)
+                for folder_path, folder_dict in folder_map.items():
+                    if anime['anilist_id'] == folder_map[folder_path]["anilist_id"]:
+                        dlPath = utils.mapper.download_image(anime['poster'])
+                        folder_map[folder_path]["local_poster"] = dlPath
+                        anime['local_poster'] = dlPath
+                        break
+                    else:
+                        continue
+                utils.mapper.save_map(folder_map)
             animeInfo.append([None, "\n\n" + subprocess.run(["chafa", "--align=top,left", "--scale=1.0", "--polite=on", anime['local_poster']], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True).stdout.strip()])
         print(colored_text(animeInfo))
 
