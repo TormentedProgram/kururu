@@ -25,6 +25,7 @@ def sync_with_anilist():
                 o['progress'] = watchlist[anilist_id]['progress']
         else:
             o['status'] = "UNLISTED"
+            o['progress'] = 0
             continue
     utils.mapper.save_map(folder_map)
 
