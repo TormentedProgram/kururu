@@ -1,6 +1,7 @@
 __pycache__
 .DS_Store
 .vscode
+/posters/
 map.json
 config.json
 presence.json

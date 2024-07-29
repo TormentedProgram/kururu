@@ -62,7 +62,7 @@ def continue_watching():
     
     print()
     for i, anime in enumerate(available_list):
-        animeInfo = colored_text([
+        animeInfo = [
             [None, '['],
             [GREEN, str(i + 1)],
             [None, '] '],
@@ -73,11 +73,14 @@ def continue_watching():
             [None, ' [' if 'shortlink' in anime and anime['shortlink'] else ""],
             [YELLOW, anime['shortlink'].replace("https://", "www.") if 'shortlink' in anime and anime['shortlink'] else ""],
             [None, ']' if 'shortlink' in anime and anime['shortlink'] else ""],
-            [None, "\n\n" + subprocess.run(["chafa", "--align=top,left", "--scale=1.0", "--polite=on", anime['local_poster']], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True).stdout.strip()]
-        ])
-        print(animeInfo)
-        
-        
+        ]
+        if utils.config.get_config()["image_previews"]:
+            if not os.path.exists(anime['local_poster']):
+                anime['local_poster'] = utils.mapper.download_image(anime['poster'])
+                utils.mapper.save_map(available_list)
+            animeInfo.append([None, "\n\n" + subprocess.run(["chafa", "--align=top,left", "--scale=1.0", "--polite=on", anime['local_poster']], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True).stdout.strip()])
+        print(colored_text(animeInfo))
+
     user_input = input("\nSelect a show ('m' for more options): ")
     if user_input == 'm':
         more_options()
@@ -108,8 +111,6 @@ def get_episode_path(selected_anime_folder, selected_anime_episode):
     except:
         return None
 
-
-allowAniskip = True
 def play_episode(episode_path, selected_anime):
     if not os.path.exists(episode_path):
         print(colored_text([[RED, f"\n'{episode_path}' does not exist!"]]))
@@ -127,7 +128,7 @@ def play_episode(episode_path, selected_anime):
 
     arg.append(episode_path)
 
-    if allowAniskip:
+    if utils.config.get_config()["aniskip"]:
         aniskipCMD = ["/usr/local/bin/ani-skip", "-q", str(selected_anime.get('mal_id')), "-e", str(selected_anime.get('progress',0) + 1)]
         aniskipArgs = re.findall(r'--[^\s]+', subprocess.run(aniskipCMD, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True).stdout.strip())
 

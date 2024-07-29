@@ -10,11 +10,15 @@ def set_up():
     print(colored_text([[GREEN, 'Running setup!\n']]))
     anime_folder = input('Anime folder path: ')
     anilist_user = input('AniList username: ')
+    image_previews = input('Do you want image previews (requires chafa) [y/n]') == 'y'
+    useAniskip = input('Do you want aniskip (requires ani-skip cli) [y/n]') == 'y'
     mpv_path = get_mpv_path()
     config = {
         'anime_folder': anime_folder,
         'anilist_user': anilist_user,
         'mpv_path': mpv_path,
+        'image_previews': image_previews,
+        'aniskip': useAniskip,
         'token': ''
     }
     save_config(config)
