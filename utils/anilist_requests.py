@@ -2,6 +2,8 @@ import requests
 import utils.config
 
 import json
+import sys
+import os
 import subprocess
 
 def show_message_box(title, message):
@@ -27,7 +29,25 @@ def anilist_call(query, variables, errorPopup=True):
       error_checking(response.json())
     return response.json()
 
-def get_watching_list(pageNumber=1):
+CACHE_FILE = os.path.join(sys.path[0], 'data', 'cached_anime_list.json')
+def load_cache():
+    """Load the entire cache."""
+    if os.path.exists(CACHE_FILE):
+        with open(CACHE_FILE, 'r') as f:
+            return json.load(f)
+    return {}
+
+def save_cache(cache_data):
+    """Save the entire cache."""
+    os.makedirs(os.path.dirname(CACHE_FILE), exist_ok=True)
+    with open(CACHE_FILE, 'w') as f:
+        json.dump(cache_data, f, indent=4, ensure_ascii=False)
+
+def get_watching_list(pageNumber=1, online=True):
+    
+    if not online:
+        return load_cache()
+    
     config_dict = utils.config.get_config()
     anilist_user = config_dict["anilist_user"]
     variables = {
@@ -53,7 +73,7 @@ def get_watching_list(pageNumber=1):
     result = anilist_call(query, variables)
     
     if "errors" in result:
-        print(f"Error in API call: {result['errors']}")
+        print(f"Error in API call: {result['errors']['message']}")
         return {}
 
     watchlist = result["data"]["Page"]["mediaList"]
@@ -75,6 +95,7 @@ def get_watching_list(pageNumber=1):
         next_page_watchlist = get_watching_list(pageNumber + 1)
         cleaned_up.update(next_page_watchlist)
     
+    save_cache(cleaned_up)
     return cleaned_up
 
 def get_search_results(searchTerm, page):
@@ -101,10 +122,12 @@ def get_search_results(searchTerm, page):
         cleaned_up.append([item["title"]["english"], item["id"]])
     return cleaned_up
 
-def update_progress(mediaId, progress, length):
-    mediaStatus = "CURRENT"
+def update_progress(mediaId, progress, length, mediaStatus="CURRENT"):
+    #this might be needed if the first episode doesnt show up in anilist
+    if length != 0 and progress == 1:
+      update_progress(mediaId, progress, length, "CURRENT")
     if length != 0 and progress >= length:
-        mediaStatus = "COMPLETED"
+        update_progress(mediaId, progress, length, "COMPLETED")
     variables = {
         "mediaId": mediaId,
         "mediaStatus": mediaStatus,
