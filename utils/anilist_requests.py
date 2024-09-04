@@ -56,7 +56,7 @@ def get_watching_list(pageNumber=1, online=True):
     }
     query = '''
     query ($userName: String, $pageNumber: Int) {
-      Page(page: $pageNumber, perPage: 50) {
+      Page(page: $pageNumber, perPage: 100) {
         mediaList(userName: $userName, type: ANIME) {
           progress
           status
@@ -196,6 +196,7 @@ def get_anime_details(anilist_id):
       Media(id: $id) {
         title {
           english
+          romaji
         },
         siteUrl,
         coverImage {

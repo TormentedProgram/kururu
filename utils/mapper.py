@@ -110,6 +110,7 @@ def map_folder(folder, anilist_id, remap=False):
         'anilist_id': anilist_id,
         'mal_id': anime_details['Media']['idMal'],
         'title': anime_details['Media']['title']['english'],
+        'romaji_title': anime_details['Media']['title']['romaji'],
         'link': anime_details['Media']['siteUrl'],
         'shortlink': shortlink,
         'length': anime_details['Media']['episodes'],

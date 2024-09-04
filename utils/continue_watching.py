@@ -44,9 +44,7 @@ def get_list():
     folder_map = utils.mapper.get_map()
     return [{**v, 'folder': k} for k, v in folder_map.items() if 'status' in v and v['status'] != 'COMPLETED' and get_episode_path(k, v.get("progress", 0) + 1)]
 
-def attemptSync(online):
-    if not online:
-        print(colored_text([[BLUE, f'\n[OFFLINE MODE]']]))
+def attemptSync(online=True):
     with ThreadPoolExecutor(max_workers=1) as executor:
         future = executor.submit(sync_with_anilist, online)
         try:
@@ -63,7 +61,7 @@ def continue_watching(online=True):
     worked = attemptSync(online)
 
     if not worked:
-        attemptSync(False)
+        worked = attemptSync(False)
 
     # We do a little trolling
     available_list = get_list()
@@ -168,7 +166,7 @@ cache_data = load_cache()
 def get_skip(selected_anime, episode):
     global cache_data
     if str(selected_anime.get('anilist_id')) in cache_data:
-        libby = libria(selected_anime.get('anilist_id'), episode)
+        libby = libria(selected_anime, episode)
         if libby:
             return opt2list(libby.strip())
         else:
@@ -181,7 +179,7 @@ def get_skip(selected_anime, episode):
         if "not found" not in aniskipArg.lower():
             return opt2list(aniskipArg.strip())
         else:
-            libby = libria(selected_anime.get('anilist_id'), episode)
+            libby = libria(selected_anime, episode)
             if libby:
                 return opt2list(libby.strip())
             else:
@@ -215,32 +213,17 @@ def opt2list(script_opts):
 
     return result
 
-def libria(mediaId, progress):
+def libria(selected_anime, progress):
     global cache_data
+    mediaId = selected_anime.get('anilist_id')
+    title = selected_anime.get('romaji_title')
+    title = title.lower().replace(' ', '-')
     if str(mediaId) in cache_data:
         json_data = cache_data[str(mediaId)]  # Use cached data if available
     else:
-        variables = {
-            "id": mediaId
-        }
-        query = '''
-        query ($id: Int) {
-          Media(id: $id) {
-             title {
-               romaji
-             }
-          }
-        }
-        '''
-        result = utils.anilist_requests.anilist_call(query, variables)
-        try:
-            title = result["data"]["Media"]["title"]["romaji"]
-        except Exception as e:
-            return None
+        url = "https://api.anilibria.tv/v3/title?code=" + title
 
-        title = title.lower().replace(' ', '-')
-
-        response = requests.get("https://api.anilibria.tv/v3/title?code=" + title)
+        response = requests.get(url)
         if response.status_code == 200:
             json_data = response.json()
             cache_data[mediaId] = json_data  # Update cache with new data
